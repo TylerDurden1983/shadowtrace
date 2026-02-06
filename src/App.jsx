@@ -8,12 +8,15 @@ export default function App(){
       <main style={{position:'relative',zIndex:10,display:'flex',alignItems:'flex-start',justifyContent:'center',width:'100%'}}>
         <div className="container-max text-center" style={{paddingTop:72}}>
           <h1 className="hero-title">SHADOWTRACE</h1>
-          <p className="hero-sub mt-4">Find your public footprint. Before someone else does.</p>
-          <div className="mt-8 flex gap-2 justify-center">
-            <input aria-label="query" placeholder="Enter email, username, or phone" className="w-full max-w-md px-4 py-3 rounded placeholder-gray-400 outline-none" />
-            <button onClick={(e)=>e.preventDefault()} className="px-4 py-3 bg-green-500 text-black font-semibold rounded">Scan</button>
+          <p className="hero-sub mt-6">Find your public footprint. Before someone else does.</p>
+          <div className="mt-8 flex flex-col items-center gap-3">
+            <div style={{display:'flex',gap:12,alignItems:'center'}}>
+              <input aria-label="query" placeholder="Enter email, username, or phone" className="w-full max-w-md px-4 py-3 rounded input-cta" />
+              <button onClick={(e)=>e.preventDefault()} className="button-cta" style={{borderRadius:8}}>Scan</button>
+            </div>
+            <div className="secondary-cta">See a sample report →</div>
           </div>
-          <p className="text-sm mt-4" style={{opacity:0.9}}>Only searches public sources. No hacks. No magic.</p>
+          <p className="disclaimer mt-6">Only searches public sources. No hacks. No magic.</p>
         </div>
       </main>
     </div>

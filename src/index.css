@@ -5,11 +5,16 @@
 html,body,#root{ height:100%; }
 body{ background:#050507; color:#E5E7EB; }
 
-h1{ color:#F9FAFB; font-weight:800; }
+h1{ color:#F9FAFB; font-weight:900; opacity:1 }
 
 .container-max{ max-width:1100px; margin:0 auto; padding:48px 24px; }
 .hero-title{ font-size: clamp(48px, 6vw, 64px); line-height:1.02; font-weight:900 }
-.hero-sub{ font-size:16px; opacity:0.88 }
+.hero-sub{ font-size:18px; opacity:0.85 }
 
-input[aria-label="query"]{ color: #E5E7EB; border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02) }
-button{ cursor:pointer }
+.input-cta{ background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.06); color:#E5E7EB }
+.input-cta:focus{ outline: 2px solid rgba(0,200,120,0.25); outline-offset: 2px }
+.button-cta{ background: #00c878; color: #041010; padding: 12px 16px; min-height:48px }
+.button-cta:hover{ filter: brightness(0.95) }
+.secondary-cta{ margin-top:8px; opacity:0.9; font-size:14px }
+.disclaimer{ font-size:13px; opacity:0.7 }
+
