@@ -21,24 +21,24 @@ export default function MatrixCanvas(){
     let raf
     function draw(){
       if(!running){ raf = requestAnimationFrame(draw); return }
-      // draw translucent black to create fading trail (tracer)
-      ctx.fillStyle = 'rgba(0,0,0,0.08)'
+      // smaller alpha so tracers persist longer
+      ctx.fillStyle = 'rgba(0,0,0,0.04)'
       ctx.fillRect(0,0,w,h)
       ctx.font = '18px monospace'
       for(let i=0;i<cols.length;i++){
         const x = Math.floor(i * (w / cols.length))
         const col = cols[i]
         const y = Math.floor(col.y)
-        // draw tail: slightly dimmer characters trailing behind head
-        for(let t=0;t<5;t++){
+        // draw tail
+        for(let t=5;t>0;t--){
           const yy = y - t*18
           if(yy < 0) continue
-          const opacity = Math.max(0, 0.8 - t*0.16)
-          ctx.fillStyle = `rgba(0,255,102,${opacity * 0.6})`
+          const opacity = Math.max(0, 0.9 - (6-t)*0.13)
+          ctx.fillStyle = `rgba(0,220,120,${opacity * 0.35})`
           ctx.fillText(randChar(), x, yy)
         }
         // bright head
-        ctx.fillStyle = 'rgba(180,255,180,0.98)'
+        ctx.fillStyle = 'rgba(180,255,180,0.99)'
         ctx.fillText(randChar(), x, y)
         col.y = y > h + 20 ? -20 : y + col.speed * 1.0
         col.speed += (Math.random()-0.5)*0.01
