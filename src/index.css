@@ -58,3 +58,11 @@ h1{ color:#F9FAFB; font-weight:900; opacity:1 }
 .results-wrap { transition: opacity 280ms ease, transform 280ms ease; }
 .results-hidden { opacity: 0; transform: translateY(10px); pointer-events: none; }
 .results-visible { opacity: 1; transform: translateY(0); }
+/* RESULTS: smooth reveal + stagger */
+.results-wrap { opacity: 0; transform: translateY(12px); transition: opacity 600ms ease, transform 600ms ease; pointer-events: none; }
+.results-wrap.results-visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+/* Each summary line animates in */
+.summary-line { opacity: 0; animation: fadeUp 650ms ease forwards; }
+/* Whole sections animate in (EXEC SUMMARY, KEY FINDINGS, RAW, PAYWALL) */
+.rp-section { opacity: 0; animation: fadeUp 800ms ease forwards; }

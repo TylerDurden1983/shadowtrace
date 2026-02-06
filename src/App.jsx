@@ -24,11 +24,12 @@ export default function App(){
         }
       },60)
     }
-    // If results are visible, animate them out first
+    // If results are visible, fade them out first then start
     if(showResults){
-      setPanelMode('results-exit')
       setResultsVisible(false)
-      setTimeout(()=>{ setShowResults(false); startScan() }, 260)
+      setPanelMode('results-exit')
+      setTimeout(()=>{ setShowResults(false); startScan() }, 450)
+      setTimeout(()=>{ if(consoleRef.current && typeof consoleRef.current.run === 'function'){ consoleRef.current.run() } }, 500)
       return
     }
     // Normal first scan
@@ -37,13 +38,12 @@ export default function App(){
 
   function handleComplete(){
     setIsRunning(false)
-    // Begin morph: mount results hidden, then fade in while console visible
-    setShowResults(true)
-    setPanelMode('handoff')
-    // trigger results enter on next frame
-    requestAnimationFrame(()=> setResultsVisible(true))
-    // after crossfade completes, lock into results mode
-    setTimeout(()=> setPanelMode('results'), 320)
+    setPanelMode('settled')
+    // give the glass time to morph, then mount results and reveal slowly
+    setTimeout(()=>{
+      setShowResults(true)
+      setTimeout(()=> setResultsVisible(true), 80)
+    }, 650)
   }
 
   const hatchMode = panelMode === 'closed' ? 'hatch-closed' : panelMode === 'open' ? 'hatch-open' : (panelMode === 'results' || panelMode === 'handoff' || panelMode === 'results-exit') ? 'hatch-results' : 'hatch-settled'
