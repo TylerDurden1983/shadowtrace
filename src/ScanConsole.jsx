@@ -69,8 +69,12 @@ export default function ScanConsole({ runSignal, onComplete }){
       setActiveIndex(-1)
       // set final lines to REPORT READY
       setLines([{text:'REPORT READY', status:'done'}])
-      setState('COMPLETE')
+    }catch(err){
+      console.error('ScanConsole runSequence error:', err)
+      appendLine('ERROR: pipeline interrupted', 'error')
+    }finally{
       runningRef.current = false
+      setState('COMPLETE')
       if (typeof onComplete === 'function') onComplete()
     }
   }
