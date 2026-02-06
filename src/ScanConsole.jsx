@@ -4,7 +4,7 @@ function wait(ms, timers){
   return new Promise(r=>{ const t = setTimeout(r, ms); timers.current.push(t) })
 }
 
-export default function ScanConsole({runSignal, onComplete}){
+export default function ScanConsole({ runSignal, onComplete }){
   const [state, setState] = useState('IDLE')
   const [lines, setLines] = useState([])
   const [activeIndex, setActiveIndex] = useState(-1)
@@ -67,17 +67,19 @@ export default function ScanConsole({runSignal, onComplete}){
       setActiveIndex(steps.length - 1)
       await wait(300, timers)
       setActiveIndex(-1)
-    }finally{
-      // final cleanup and notify parent
+      // set final lines to REPORT READY
+      setLines([{text:'REPORT READY', status:'done'}])
       setState('COMPLETE')
       runningRef.current = false
-      onComplete?.()
+      if (typeof onComplete === 'function') onComplete()
     }
   }
 
   // expose runSequence to parent via runSignal ref
   useEffect(() => {
-    if (runSignal?.current) runSignal.current.run = runSequence
+    if (!runSignal) return
+    if (!runSignal.current) return
+    runSignal.current.run = runSequence
   }, [runSignal])
 
   return (
