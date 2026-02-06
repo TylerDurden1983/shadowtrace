@@ -92,14 +92,24 @@ export default function App() {
 
             <p className="disclaimer mt-6">Only searches public sources. No hacks. No magic.</p>
 
-            {/* MORPH PANEL */}
-            <div className="panel-inner" style={{ marginTop: 16 }}>
-              <div className={`console-layer ${phase === "results" ? "layer-out" : "layer-in"}`}>
-                <ScanConsole key={`console-${scanNonce}`} runSignal={consoleRef} onComplete={onComplete} />
+            {/* LAYERS: console then results. Both mounted; opacity + pointer-events controlled by CSS */}
+            <div className="panel-layers">
+              <div className={[
+                "layer",
+                "console-layer",
+                phase === "scanning" ? "layer-in" : "layer-out",
+              ].join(" ")} >
+                <div className="console-wrap console-visible">
+                  <ScanConsole key={`console-${scanNonce}`} runSignal={consoleRef} onComplete={onComplete} />
+                </div>
               </div>
 
-              <div className={`results-layer ${phase === "results" ? "layer-in" : "layer-out"}`}>
-                {phase === "results" && <ResultsPanel key={`results-${scanNonce}`} />}
+              <div className={[
+                "layer",
+                "results-layer",
+                phase === "results" ? "layer-in" : "layer-out",
+              ].join(" ")} >
+                <ResultsPanel key={`results-${scanNonce}`} />
               </div>
             </div>
 
