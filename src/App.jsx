@@ -7,26 +7,46 @@ export default function App(){
   const consoleRef = useRef({})
   const [isRunning, setIsRunning] = useState(false)
   const [showResults, setShowResults] = useState(false)
+  const [resultsVisible, setResultsVisible] = useState(false)
   const [scanNonce, setScanNonce] = useState(0)
-  const [panelMode, setPanelMode] = useState('closed')
+  const [panelMode, setPanelMode] = useState('closed') // closed | open | handoff | results | results-exit
 
-  function onScanClick(e){
-    e.preventDefault()
+  function onScanClick(){
     if(isRunning) return
-    setIsRunning(true)
-    setShowResults(false)
-    setPanelMode('open')
-    setScanNonce(n=>n+1)
-    // trigger console run
-    setTimeout(()=>{ if(consoleRef.current && typeof consoleRef.current.run === 'function') consoleRef.current.run() }, 50)
+    const startScan = () => {
+      setIsRunning(true)
+      setPanelMode('open')
+      setScanNonce(n=>n+1)
+      // let the console mount, then run
+      setTimeout(()=>{
+        if(consoleRef.current && typeof consoleRef.current.run === 'function'){
+          consoleRef.current.run()
+        }
+      },60)
+    }
+    // If results are visible, animate them out first
+    if(showResults){
+      setPanelMode('results-exit')
+      setResultsVisible(false)
+      setTimeout(()=>{ setShowResults(false); startScan() }, 260)
+      return
+    }
+    // Normal first scan
+    startScan()
   }
+
   function handleComplete(){
     setIsRunning(false)
-    setPanelMode('settled')
-    setTimeout(()=> setShowResults(true), 220)
+    // Begin morph: mount results hidden, then fade in while console visible
+    setShowResults(true)
+    setPanelMode('handoff')
+    // trigger results enter on next frame
+    requestAnimationFrame(()=> setResultsVisible(true))
+    // after crossfade completes, lock into results mode
+    setTimeout(()=> setPanelMode('results'), 320)
   }
 
-  const hatchMode = panelMode === 'closed' ? 'hatch-closed' : panelMode === 'open' ? 'hatch-open' : (panelMode==='settled' && showResults) ? 'hatch-results' : 'hatch-settled'
+  const hatchMode = panelMode === 'closed' ? 'hatch-closed' : panelMode === 'open' ? 'hatch-open' : (panelMode === 'results' || panelMode === 'handoff' || panelMode === 'results-exit') ? 'hatch-results' : 'hatch-settled'
 
   return (
     <div style={{minHeight:'100vh'}}>
@@ -46,10 +66,10 @@ export default function App(){
             <p className="disclaimer mt-6">Only searches public sources. No hacks. No magic.</p>
 
             <div className={`hatch ${hatchMode}`} style={{marginTop:16}}>
-              <div className={`console-wrap ${panelMode==='open' ? 'console-visible' : 'console-hidden'}`} style={{transitionDelay: panelMode==='open'?'150ms':'0ms'}}>
+              <div className={`console-wrap ${(panelMode === 'open' || panelMode === 'handoff') ? 'console-visible' : 'console-hidden'}`} style={{transitionDelay: panelMode==='open' ? '150ms' : '0ms'}}>
                 <ScanConsole key={`console-${scanNonce}`} runSignal={consoleRef} onComplete={handleComplete} />
               </div>
-              <div className={`results-wrap ${(panelMode==='settled' && showResults) ? 'results-visible' : 'results-hidden'}`}>
+              <div className={`results-wrap ${resultsVisible ? 'results-visible' : 'results-hidden'}`}>
                 {showResults && <ResultsPanel key={`results-${scanNonce}`} />}
               </div>
             </div>

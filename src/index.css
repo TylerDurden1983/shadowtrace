@@ -51,3 +51,10 @@ h1{ color:#F9FAFB; font-weight:900; opacity:1 }
 
 /* ensure blurred class exists */
 .blurred{ filter: blur(4px); }
+/* updated transitions for console/results morph */
+.console-wrap { transition: opacity 260ms ease, transform 260ms ease; }
+.console-visible { opacity: 1; transform: translateY(0); }
+.console-hidden { opacity: 0; transform: translateY(8px); pointer-events: none; }
+.results-wrap { transition: opacity 280ms ease, transform 280ms ease; }
+.results-hidden { opacity: 0; transform: translateY(10px); pointer-events: none; }
+.results-visible { opacity: 1; transform: translateY(0); }
