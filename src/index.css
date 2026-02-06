@@ -36,3 +36,29 @@ h1{ color:#F9FAFB; font-weight:900; opacity:1 }
 .blurred{ filter: blur(4px); }
 .results-panel{ animation: fadeInUp 400ms ease both }
 @keyframes fadeInUp{ from { opacity:0; transform: translateY(8px) } to { opacity:1; transform: translateY(0) } }
+/* App shell centering */
+.app-shell { position: relative; z-index: 10; width: 100%; min-height: 100vh; display: flex; align-items: flex-start; justify-content: center; padding-top: 72px; }
+.container-max { width: 100%; display: flex; justify-content: center; }
+/* Glass panel sizing + morph */
+.glass-panel { position: relative; width: min(980px, calc(100vw - 48px)); background: rgba(0, 0, 0, 0.6); border-radius: 12px; padding: 36px 32px; display: block; backdrop-filter: blur(4px); overflow: hidden; transition: max-height 520ms ease, padding 520ms ease, transform 520ms ease, opacity 520ms ease; }
+/* Heights control the “morph” feel */
+.glass-closed { max-height: 320px; }
+.glass-open { max-height: 720px; }
+.glass-results { max-height: 980px; }
+/* Layer choreography */
+.panel-layers { position: relative; margin-top: 18px; min-height: 420px; /* prevents jump when swapping console/results */ }
+.layer { position: absolute; inset: 0; transition: opacity 520ms ease, transform 520ms ease; }
+.layer-in { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.layer-out { opacity: 0; transform: translateY(10px); pointer-events: none; }
+/* Make console/results sit nicely */
+.console-wrap { width: 100%; }
+/* Results staging: slow it down so it doesn’t “pop” */
+.results-layer .results-root { animation: resultsIn 700ms ease forwards; }
+@keyframes resultsIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+/* Stagger sections inside ResultsPanel */
+.results-layer .reveal { opacity: 0; transform: translateY(10px); animation: revealIn 650ms ease forwards; }
+.results-layer .delay-1 { animation-delay: 120ms; }
+.results-layer .delay-2 { animation-delay: 260ms; }
+.results-layer .delay-3 { animation-delay: 420ms; }
+.results-layer .delay-4 { animation-delay: 580ms; }
+@keyframes revealIn { to { opacity: 1; transform: translateY(0); } }
