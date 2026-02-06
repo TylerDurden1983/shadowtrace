@@ -1,17 +1,28 @@
 import React from 'react'
-import './index.css'
 export default function ResultsPanel(){
+  const summary = [
+    'Public exposures detected: 14',
+    'High-confidence identity matches: 3',
+    'Platforms correlated: 5',
+    'Earliest public trace: 2011',
+    'Latest observed activity: 2024',
+    'Exposure level: MODERATE'
+  ]
+  const findings = [
+    'Email address appears in multiple credential datasets',
+    'Username reused across multiple platforms',
+    'Profile image match detected on public forum',
+    'Archived forum activity referencing operational context'
+  ]
   return (
     <div style={{padding:12, fontFamily:'system-ui, monospace', color:'#E5E7EB'}}>
+      <div style={{fontFamily:'monospace', color:'#F9FAFB', marginBottom:10}}>Scan completed · Public sources only</div>
       <div className="results-panel" style={{background:'rgba(255,255,255,0.02)', padding:16, borderRadius:8}}>
         <h3 style={{margin:0, marginBottom:8}}>EXECUTIVE SUMMARY</h3>
         <ul style={{textAlign:'left', lineHeight:1.6}}>
-          <li>Public exposures detected: <strong>14</strong></li>
-          <li>High-confidence identity matches: <strong>3</strong></li>
-          <li>Platforms correlated: <strong>5</strong></li>
-          <li>Earliest public trace: <strong>2011</strong></li>
-          <li>Latest observed activity: <strong>2024</strong></li>
-          <li>Exposure level: <strong>MODERATE</strong></li>
+          {summary.map((s,i)=> (
+            <li key={i} className="summary-line" style={{animationDelay:`${i*140}ms`}}>{s}</li>
+          ))}
         </ul>
       </div>
 
@@ -20,9 +31,9 @@ export default function ResultsPanel(){
       <div style={{background:'rgba(255,255,255,0.02)', padding:16, borderRadius:8}}>
         <h3 style={{marginTop:0}}>KEY FINDINGS</h3>
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
-          {[1,2,3,4].map(i=> (
+          {findings.map((t,i)=> (
             <div key={i} style={{padding:12, borderRadius:6, background:'rgba(0,0,0,0.25)'}}>
-              <div style={{fontWeight:700}}>Finding {i} title</div>
+              <div style={{fontWeight:700}}>{t}</div>
               <div className="blurred" style={{marginTop:8}}>Sensitive detail text blurred for privacy and monetization. Unlock to view full detail.</div>
             </div>
           ))}

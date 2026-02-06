@@ -93,12 +93,7 @@ export default function ScanConsole({runSignal, onComplete}){
           <div style={{width: `${progress}%`, height:8, background:'#00c878', transition:'width 900ms linear'}} />
         </div>
       </div>
-      ) : (
-        <div style={{padding:8}}>
-          <div style={{fontFamily:'monospace', color:'#F9FAFB'}}>Scan completed · Public sources only</div>
-          <div style={{height:80, marginTop:8, border: '1px dashed rgba(255,255,255,0.04)', borderRadius:6}} />
-        </div>
-      )}
+      ) : null }
     </div>
   )
 }

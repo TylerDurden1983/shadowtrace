@@ -6,6 +6,8 @@ import './index.css'
 export default function App(){
   const consoleRef = useRef({})
   const [panelMode, setPanelMode] = useState('closed') // closed | open | settled
+  const [showResults, setShowResults] = useState(false)
+  const [scanNonce, setScanNonce] = useState(0)
 
   function onScanClick(e){
     e.preventDefault()
@@ -13,13 +15,16 @@ export default function App(){
     const btn = document.getElementById('scanBtn')
     if(!input || !btn) return
     if(btn.disabled) return
+    // reset results and open hatch
+    setShowResults(false)
+    setPanelMode('open')
+    setScanNonce(n=>n+1)
+
     input.disabled = true
     input.style.opacity = '0.6'
     btn.textContent = 'TASKING'
     btn.disabled = true
     btn.style.opacity = '0.8'
-    // open hatch
-    setPanelMode('open')
     // trigger console run
     if(consoleRef.current && typeof consoleRef.current.run === 'function'){
       consoleRef.current.run()
@@ -32,9 +37,10 @@ export default function App(){
     if(btn){ btn.disabled = false; btn.style.opacity = '1'; btn.textContent = 'Scan' }
     // settle hatch (compact showing header/placeholder)
     setPanelMode('settled')
+    setTimeout(()=> setShowResults(true), 220)
   }
 
-  const hatchMode = panelMode === 'closed' ? 'hatch-closed' : panelMode === 'open' ? 'hatch-open' : 'hatch-settled'
+  const hatchMode = panelMode === 'closed' ? 'hatch-closed' : panelMode === 'open' ? 'hatch-open' : (panelMode==='settled' && showResults) ? 'hatch-results' : 'hatch-settled'
 
   return (
     <div style={{minHeight:'100vh'}}>
@@ -54,12 +60,11 @@ export default function App(){
             <p className="disclaimer mt-6">Only searches public sources. No hacks. No magic.</p>
 
             <div className={`hatch ${hatchMode}`} style={{marginTop:16}}>
-              <div className={`console-wrap ${(panelMode==='open' || panelMode==='settled') ? 'console-visible' : 'console-hidden'}`} style={{transitionDelay: panelMode==='open'?'150ms':'0ms'}}>
-                {panelMode === 'settled' ? (
-                  <ResultsPanel />
-                ) : (
-                  <ScanConsole runSignal={consoleRef} onComplete={onComplete} />
-                )}
+              <div className={`console-wrap ${panelMode==='open' ? 'console-visible' : 'console-hidden'}`} style={{transitionDelay: panelMode==='open'?'150ms':'0ms'}}>
+                <ScanConsole key={`console-${scanNonce}`} runSignal={consoleRef} onComplete={onComplete} />
+              </div>
+              <div className={`results-wrap ${(panelMode==='settled' && showResults) ? 'results-visible' : 'results-hidden'}`}>
+                <ResultsPanel key={`results-${scanNonce}`} />
               </div>
             </div>
 
