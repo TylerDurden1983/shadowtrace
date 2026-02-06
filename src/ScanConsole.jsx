@@ -26,24 +26,6 @@ export default function ScanConsole({runSignal, onComplete}){
     setLines(l => { if(l.length===0) return l; const copy = l.slice(); copy[copy.length-1] = {...copy[copy.length-1], status:'done'}; return copy })
   }
 
-  const animateProgressTo = (target, duration) => {
-    return new Promise(res=>{
-      const start = progress
-      const delta = target - start
-      if(duration <= 0){ setProgress(target); return res() }
-      const stepMs = 50
-      const steps = Math.max(1, Math.floor(duration/stepMs))
-      let cur = 0
-      const t = setInterval(()=>{
-        cur++
-        const v = Math.round(start + delta*(cur/steps))
-        setProgress(v)
-        if(cur>=steps){ clearInterval(t); timers.current.push(t); return res() }
-      }, stepMs)
-      timers.current.push(t)
-    })
-  }
-
   async function runSequence(){
     if(runningRef.current) return
     runningRef.current = true
@@ -107,7 +89,7 @@ export default function ScanConsole({runSignal, onComplete}){
           ))}
         </div>
         <div style={{height:8, background:'rgba(255,255,255,0.06)', borderRadius:4, marginTop:10, overflow:'hidden'}}>
-          <div style={{width: `${progress}%`, height:8, background:'#00c878', transition:'width 800ms linear'}} />
+          <div style={{width: `${progress}%`, height:8, background:'#00c878', transition:'width 900ms linear'}} />
         </div>
       </div>
       ) : (
