@@ -11,45 +11,43 @@ export default function MatrixCanvas(){
     function resize(){
       w = canvas.width = window.innerWidth
       h = canvas.height = window.innerHeight
-      // lower density: fewer columns
-      const count = Math.max(8, Math.floor(w / 40))
-      cols = new Array(count).fill(0).map(()=>({y: -Math.random()*h, speed: 0.2 + Math.random()*0.6}))
+      // higher density for classic look
+      const count = Math.max(20, Math.floor(w / 18))
+      cols = new Array(count).fill(0).map(()=>({y: -Math.random()*h, speed: 0.08 + Math.random()*0.3}))
     }
     function randChar(){
-      const chars = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ'
+      const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZあいうえおカタカナ'
       return chars.charAt(Math.floor(Math.random()*chars.length))
     }
     let raf
     function draw(){
       if(!running){ raf = requestAnimationFrame(draw); return }
-      // subtle trail
-      ctx.fillStyle = 'rgba(10,10,12,0.12)'
+      // subtle fade for trails but not blurry
+      ctx.fillStyle = 'rgba(0,0,0,0.12)'
       ctx.fillRect(0,0,w,h)
-      ctx.font = '16px monospace'
+      ctx.font = '18px monospace'
       for(let i=0;i<cols.length;i++){
         const x = Math.floor(i * (w / cols.length))
         const col = cols[i]
         const y = col.y
-        ctx.fillStyle = 'rgba(95,127,98,0.18)' // muted green low opacity
-        ctx.shadowColor = 'rgba(95,127,98,0.35)'
-        ctx.shadowBlur = 4
+        ctx.fillStyle = 'rgba(0,255,102,0.95)' // brighter green
+        ctx.shadowColor = 'transparent'
         ctx.fillText(randChar(), x, y)
-        col.y = y > h + 20 ? -20 : y + col.speed * 1.2 // slower motion
+        col.y = y > h + 20 ? -20 : y + col.speed * 1.0 // slow calm motion
         // slight organic speed variation
-        col.speed += (Math.random()-0.5)*0.02
-        if(col.speed < 0.1) col.speed = 0.1
-        if(col.speed > 1) col.speed = 1
+        col.speed += (Math.random()-0.5)*0.01
+        if(col.speed < 0.03) col.speed = 0.03
+        if(col.speed > 0.6) col.speed = 0.6
       }
       raf = requestAnimationFrame(draw)
     }
     function start(){
-      // reinit so drops start from top
       cols.forEach(c=> c.y = -Math.random()*h)
       running = true
     }
     resize()
     window.addEventListener('resize', resize)
-    // initial static for ~300ms then start
+    // start after brief delay
     const t = setTimeout(start, 300)
     raf = requestAnimationFrame(draw)
     return ()=>{ cancelAnimationFrame(raf); window.removeEventListener('resize', resize); clearTimeout(t) }

@@ -1,9 +1,6 @@
-.scanlines{
-  position:absolute; inset:0; background-image: linear-gradient(rgba(255,255,255,0.02) 50%, rgba(0,0,0,0.02) 50%);
-  background-size: 100% 4px; mix-blend-mode: overlay; opacity:0.05;
-}
+/* Matrix styles - no scanlines for classic look */
 .vignette{
-  position:absolute; inset:0; pointer-events:none; background: radial-gradient(ellipse at center, rgba(0,0,0,0) 35%, rgba(0,0,0,0.75) 100%);
+  position:absolute; inset:0; pointer-events:none; background: radial-gradient(ellipse at center, rgba(0,0,0,0) 50%, rgba(0,0,0,0.55) 100%);
 }
-input[aria-label="query"]{ color: #e6fff2; border: 1px solid rgba(255,255,255,0.06); }
+input[aria-label="query"]{ color: #E5E7EB; border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02) }
 button{ cursor:pointer }
