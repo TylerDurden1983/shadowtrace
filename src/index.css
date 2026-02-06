@@ -18,3 +18,11 @@ h1{ color:#F9FAFB; font-weight:900; opacity:1 }
 .secondary-cta{ margin-top:8px; opacity:0.9; font-size:14px }
 .disclaimer{ font-size:13px; opacity:0.7 }
 
+/* Panel animation classes */
+.glass-panel{ transition: max-height 450ms cubic-bezier(.2,.9,.2,1), padding 350ms; overflow: hidden }
+.glass-closed{ max-height: 140px }
+.glass-open{ max-height: 520px }
+.glass-settled{ max-height: 200px }
+.console-wrap{ transition: opacity 300ms ease, transform 300ms ease }
+.console-hidden{ opacity:0; transform: translateY(8px); pointer-events:none }
+.console-visible{ opacity:1; transform: translateY(0) }

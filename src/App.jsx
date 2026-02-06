@@ -1,9 +1,11 @@
-import React, {useRef} from 'react'
+import React, {useRef, useState} from 'react'
 import MatrixCanvas from './matrix/MatrixCanvas'
 import ScanConsole from './ScanConsole'
 import './index.css'
 export default function App(){
   const consoleRef = useRef({})
+  const [panelMode, setPanelMode] = useState('closed') // closed | open | settled
+
   function onScanClick(e){
     e.preventDefault()
     const input = document.getElementById('queryInput')
@@ -15,6 +17,8 @@ export default function App(){
     btn.textContent = 'TASKING'
     btn.disabled = true
     btn.style.opacity = '0.8'
+    // open panel
+    setPanelMode('open')
     // trigger console run
     if(consoleRef.current && typeof consoleRef.current.run === 'function'){
       consoleRef.current.run()
@@ -25,6 +29,8 @@ export default function App(){
     const btn = document.getElementById('scanBtn')
     if(input){ input.disabled = false; input.style.opacity = '1' }
     if(btn){ btn.disabled = false; btn.style.opacity = '1'; btn.textContent = 'Scan' }
+    // settle panel (compact showing header/placeholder)
+    setPanelMode('settled')
   }
 
   return (
@@ -32,7 +38,7 @@ export default function App(){
       <MatrixCanvas />
       <main style={{position:'relative',zIndex:10,display:'flex',alignItems:'flex-start',justifyContent:'center',width:'100%'}}>
         <div className="container-max text-center" style={{paddingTop:72}}>
-          <div style={{background:'rgba(0,0,0,0.6)', borderRadius:12, padding:'36px 32px', display:'inline-block', backdropFilter:'blur(4px)'}}> 
+          <div className={`glass-panel ${panelMode==='closed'?'glass-closed':panelMode==='open'?'glass-open':'glass-settled'}`} style={{background:'rgba(0,0,0,0.6)', borderRadius:12, padding:'36px 32px', display:'inline-block', backdropFilter:'blur(4px)'}}> 
             <h1 className="hero-title">SHADOWTRACE</h1>
             <p className="hero-sub mt-6">Find your public footprint. Before someone else does.</p>
             <div className="mt-8 flex flex-col items-center gap-3">
@@ -43,7 +49,9 @@ export default function App(){
               <div className="secondary-cta">See a sample report →</div>
             </div>
             <p className="disclaimer mt-6">Only searches public sources. No hacks. No magic.</p>
-            <ScanConsole runSignal={consoleRef} onComplete={onComplete} />
+            <div className={`console-wrap ${panelMode==='open' ? 'console-visible' : 'console-hidden'}`} style={{transitionDelay: panelMode==='open'?'150ms':'0ms'}}>
+              <ScanConsole runSignal={consoleRef} onComplete={onComplete} />
+            </div>
           </div>
         </div>
       </main>
