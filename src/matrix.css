@@ -1,0 +1,11 @@
+/* Matrix overlay styles */
+.scanlines{
+  position:absolute; inset:0; background-image: linear-gradient(rgba(255,255,255,0.02) 50%, rgba(0,0,0,0.02) 50%);
+  background-size: 100% 4px; mix-blend-mode: overlay; opacity:0.08;
+}
+.vignette{
+  position:absolute; inset:0; pointer-events:none; background: radial-gradient(ellipse at center, rgba(0,0,0,0) 40%, rgba(0,0,0,0.6) 100%);
+}
+/* ensure inputs look good without Tailwind in case */
+input[aria-label="query"]{ color: #e6fff2; border: 1px solid rgba(255,255,255,0.06); }
+button{ cursor:pointer }
