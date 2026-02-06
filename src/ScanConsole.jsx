@@ -32,71 +32,43 @@ export default function ScanConsole({runSignal, onComplete}){
     if(runningRef.current) return
     runningRef.current = true
     setLines([])
+    setActiveIndex(-1)
     setProgress(0)
     try{
-      // TASKING (~300ms) - no bar
-      setState('TASKING')
-      appendLine('TASK ACCEPTED', 'done')
-      await wait(300, timers)
-
-      // INITIALIZING (~800ms) bar 0 -> 10
-      setState('INITIALIZING')
-      appendLine('Initializing recon pipeline...', 'active')
-      await wait(500, timers)
-      appendLine('Normalizing identifier', 'done')
-      await wait(200, timers)
-      appendLine('Hashing input', 'done')
-      await wait(200, timers)
-      appendLine('Spawning workers', 'done')
-      setProgress(10)
-      await wait(100, timers)
-
-      // COLLECTING (~3-4s) 10 ->25->40->55->65
-      setState('COLLECTING')
-      const collect = [
-        'Enumerating identifier variants...',
-        'Querying public identity indexes...',
-        'Scanning breach metadata...',
-        'Mapping username reuse patterns...',
-        'Analyzing social graph overlaps...',
-        'Correlating cross-platform signals...'
+      // define deterministic steps: text, progressTarget, delay
+      const steps = [
+        {text:'TASK ACCEPTED', progress:2, delay:300},
+        {text:'Initializing reconnaissance pipeline...', progress:10, delay:1000},
+        {text:'Normalizing identifier', progress:10, delay:200},
+        {text:'Hashing input', progress:10, delay:200},
+        {text:'Spawning workers', progress:10, delay:200},
+        {text:'Enumerating identifier variants...', progress:25, delay:600},
+        {text:'Querying public identity indexes...', progress:40, delay:600},
+        {text:'Scanning breach metadata...', progress:55, delay:600},
+        {text:'Mapping username reuse patterns...', progress:65, delay:600},
+        {text:'Analyzing social graph overlaps...', progress:65, delay:600},
+        {text:'Correlating cross-platform signals...', progress:65, delay:600},
+        {text:'Cross-referencing signals...', progress:75, delay:700},
+        {text:'Calculating exposure confidence...', progress:85, delay:800},
+        {text:'Compiling intelligence brief...', progress:100, delay:1000},
+        {text:'REPORT READY', progress:100, delay:300}
       ]
-      const collectProgress = [25,40,55,65]
-      let pIndex = 0
-      for(let i=0;i<collect.length;i++){
-        appendLine(collect[i], 'done')
-        // pause between lines
-        await wait(600, timers)
-        // update progress at certain points (after certain lines)
-        if(i===0){ setProgress(25) }
-        else if(i===1){ setProgress(40) }
-        else if(i===2){ setProgress(55) }
-        else if(i===3){ setProgress(65) }
+      // run steps in order
+      for(let i=0;i<steps.length;i++){
+        const s = steps[i]
+        appendLine(s.text, 'active')
+        setActiveIndex(i)
+        // set progress to target
+        setProgress(s.progress)
+        await wait(s.delay, timers)
+        // mark current as done
+        markLastDone()
       }
-
-      // CORRELATING (~1.5-2s) 65->75->85
-      setState('CORRELATING')
-      appendLine('Cross-referencing signals...', 'active')
-      await wait(700, timers)
-      markLastDone()
-      appendLine('Calculating exposure confidence...', 'done')
-      setProgress(75)
-      await wait(800, timers)
-      setProgress(85)
-
-      // COMPILING (~1s) 85->100
-      setState('COMPILING')
-      appendLine('Compiling intelligence brief...', 'active')
-      await wait(1000, timers)
-      markLastDone()
-      setProgress(100)
-
-      // COMPLETE
-      setState('COMPLETE')
-      setLines([{text:'REPORT READY', status:'done'}])
-      setActiveIndex(0)
-      await wait(700, timers)
+      // complete handling: briefly highlight REPORT READY then clear
+      setActiveIndex(steps.length-1)
+      await wait(300, timers)
       setActiveIndex(-1)
+      setState('COMPLETE')
       runningRef.current = false
       onComplete?.()
     }catch(e){
@@ -116,7 +88,7 @@ export default function ScanConsole({runSignal, onComplete}){
       <div style={{background:'rgba(0,0,0,0.45)', borderRadius:8, padding:12, fontFamily:'monospace', fontSize:14, color:'#E5E7EB'}}>
         <div style={{height:160, overflow:'hidden'}}>
           {lines.map((l,i)=> (
-            <div key={i} className={`console-line ${i===activeIndex ? 'active' : (l.status==='done' ? 'muted' : '')}`} style={{marginBottom:6, transition:'opacity 300ms', fontFamily:'monospace'}}>{l.text}</div>
+            <div key={i} className={`console-line ${i===activeIndex ? 'active' : (i<activeIndex ? 'muted' : '')}`} style={{marginBottom:6, transition:'opacity 300ms', fontFamily:'monospace'}}>{l.text}</div>
           ))}
         </div>
         <div style={{height:8, background:'rgba(255,255,255,0.06)', borderRadius:4, marginTop:10, overflow:'hidden'}}>
