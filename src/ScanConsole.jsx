@@ -57,13 +57,14 @@ export default function ScanConsole({runSignal, onComplete}){
       for(let i=0;i<steps.length;i++){
         const s = steps[i]
         appendLine(s.text, 'active')
-        // animate progress to target over the step delay
-        await animateProgressTo(s.progress, s.delay)
+        // set progress once for this step, then wait the step duration
+        setProgress(s.progress)
+        await wait(s.delay, timers)
         // mark current as done
         markLastDone()
       }
       // briefly highlight REPORT READY then clear
-      setActiveIndex(lines.length) // last index (may be stale, but fine)
+      setActiveIndex(steps.length - 1)
       await wait(300, timers)
       setActiveIndex(-1)
     }finally{
