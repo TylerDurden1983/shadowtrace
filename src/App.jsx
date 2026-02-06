@@ -3,10 +3,10 @@ import MatrixCanvas from './matrix/MatrixCanvas'
 import './index.css'
 export default function App(){
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center'}}>
       <MatrixCanvas />
       <div style={{position:'fixed',inset:0,zIndex:5,pointerEvents:'none',background:'rgba(0,0,0,0.38)'}} />
-      <main style={{position:'relative',zIndex:10}} className="min-h-screen flex items-center justify-center">
+      <main style={{position:'relative',zIndex:10,display:'flex',alignItems:'center',justifyContent:'center',width:'100%'}}>
         <div className="container-max text-center">
           <h1 className="hero-title">SHADOWTRACE</h1>
           <p className="hero-sub mt-4">Find your public footprint. Before someone else does.</p>
