@@ -1,38 +1,51 @@
-import React, {useState, useEffect, useRef} from 'react'
+import React, {useState, useRef, useEffect} from 'react'
 
 const STATES = ['IDLE','TASKING','INITIALIZING','COLLECTING','CORRELATING','COMPILING','COMPLETE']
 
-export default function ScanConsole({onStart}){
+function wait(ms, timers){
+  return new Promise(r=>{ const t = setTimeout(r, ms); timers.current.push(t) })
+}
+
+export default function ScanConsole({runSignal}){
   const [state, setState] = useState('IDLE')
   const [lines, setLines] = useState([])
   const [progress, setProgress] = useState(0)
-  const [running, setRunning] = useState(false)
-  const containerRef = useRef(null)
+  const runningRef = useRef(false)
+  const timers = useRef([])
 
   useEffect(()=>{
-    if(state==='IDLE') return
-    let timers=[]
-    async function run(){
-      // TASKING
+    return ()=>{ // cleanup timers on unmount
+      timers.current.forEach(t=>clearTimeout(t))
+      timers.current = []
+    }
+  },[])
+
+  async function runSequence(){
+    if(runningRef.current) return
+    runningRef.current = true
+    setLines([])
+    setProgress(0)
+    try{
+      // TASKING (~300ms) - no bar
       setState('TASKING')
       setLines(l=>[...l, {text:'TASK ACCEPTED', status:'done'}])
-      setProgress(2)
-      await new Promise(r=> timers.push(setTimeout(r,300)))
-      // INITIALIZING
+      await wait(300, timers)
+
+      // INITIALIZING (~800ms) bar 0 -> 10
       setState('INITIALIZING')
       setLines(l=>[...l, {text:'Initializing recon pipeline...', status:'active'}])
-      setProgress(8)
-      // show sublines
-      const initLines=['Normalizing identifier','Hashing input','Spawning workers']
-      for(let i=0;i<initLines.length;i++){
-        await new Promise(r=> timers.push(setTimeout(r,220)))
-        setLines(l=>[...l, {text:initLines[i], status:'done'}])
-        setProgress(p=>p+ (i===0?1:1))
-      }
-      await new Promise(r=> timers.push(setTimeout(r,800)))
-      // COLLECTING
+      await wait(500, timers)
+      setLines(l=>[...l, {text:'Normalizing identifier', status:'done'}])
+      await wait(200, timers)
+      setLines(l=>[...l, {text:'Hashing input', status:'done'}])
+      await wait(200, timers)
+      setLines(l=>[...l, {text:'Spawning workers', status:'done'}])
+      setProgress(10)
+      await wait(100, timers)
+
+      // COLLECTING (~3-4s) 10 ->25->40->55->65
       setState('COLLECTING')
-      const collectLines=[
+      const collect = [
         'Enumerating identifier variants...',
         'Querying public identity indexes...',
         'Scanning breach metadata...',
@@ -40,71 +53,71 @@ export default function ScanConsole({onStart}){
         'Analyzing social graph overlaps...',
         'Correlating cross-platform signals...'
       ]
-      let pct=10
-      for(let i=0;i<collectLines.length;i++){
-        await new Promise(r=> timers.push(setTimeout(r, 600 + Math.random()*800)))
-        setLines(l=>[...l, {text:collectLines[i], status:'done'}])
-        pct += (i===0?10: (10 + Math.random()*8))
-        setProgress(Math.min(65, Math.floor(pct)))
+      const collectProgress = [25,40,55,65]
+      let pIndex = 0
+      for(let i=0;i<collect.length;i++){
+        setLines(l=>[...l, {text:collect[i], status:'done'}])
+        // pause between lines
+        await wait(600, timers)
+        // update progress at certain points (after certain lines)
+        if(i===0){ setProgress(25) }
+        else if(i===1){ setProgress(40) }
+        else if(i===2){ setProgress(55) }
+        else if(i===3){ setProgress(65) }
       }
-      // CORRELATING
+
+      // CORRELATING (~1.5-2s) 65->75->85
       setState('CORRELATING')
       setLines(l=>[...l, {text:'Cross-referencing signals...', status:'active'}])
-      setProgress(68)
-      await new Promise(r=> timers.push(setTimeout(r,900)))
-      setLines(l=>lines=>[...lines, {text:'Calculating exposure confidence...', status:'done'}])
-      setProgress(82)
-      await new Promise(r=> timers.push(setTimeout(r,800)))
-      // COMPILING
+      await wait(700, timers)
+      setLines(l=>[...l.slice(0,-1), {text:'Cross-referencing signals...', status:'done'}])
+      setLines(l=>[...l, {text:'Calculating exposure confidence...', status:'done'}])
+      setProgress(75)
+      await wait(800, timers)
+      setProgress(85)
+
+      // COMPILING (~1s) 85->100
       setState('COMPILING')
       setLines(l=>[...l, {text:'Compiling intelligence brief...', status:'active'}])
-      setProgress(95)
-      await new Promise(r=> timers.push(setTimeout(r,1000)))
+      await wait(1000, timers)
+      setLines(l=>[...l.slice(0,-1), {text:'Compiling intelligence brief...', status:'done'}])
       setProgress(100)
+
       // COMPLETE
       setState('COMPLETE')
-      setLines(l=>[...l, {text:'REPORT READY', status:'done'}])
-      setRunning(false)
-      return ()=> timers.forEach(t=>clearTimeout(t))
+      setLines([{text:'REPORT READY', status:'done'}])
+      runningRef.current = false
+    }catch(e){
+      runningRef.current = false
     }
-    run()
-    return ()=>{}
-  },[state])
-
-  // helper to start from outside
-  useEffect(()=>{
-    if(!onStart) return
-  },[onStart])
-
-  function start(){
-    if(running) return
-    setLines([])
-    setProgress(1)
-    setRunning(true)
-    setState('TASKING')
   }
+
+  // expose runSequence via window event removed; parent will call runSequence through prop
+  useEffect(()=>{
+    if(runSignal && typeof runSignal.current === 'function'){
+      runSignal.current.run = runSequence
+    }
+  },[runSignal])
 
   return (
     <div style={{marginTop:24}}>
+      {state!== 'COMPLETE' ? (
       <div style={{background:'rgba(0,0,0,0.45)', borderRadius:8, padding:12, fontFamily:'monospace', fontSize:14, color:'#E5E7EB'}}>
-        <div style={{height:160, overflow:'hidden'}} ref={containerRef}>
+        <div style={{height:160, overflow:'hidden'}}>
           {lines.map((l,i)=> (
             <div key={i} style={{color: l.status==='active' ? '#7CFC9A' : '#9CA3AF', opacity: l.status==='done'?0.95:1, marginBottom:6, transition:'opacity 300ms'}}>{l.text}</div>
           ))}
         </div>
         <div style={{height:8, background:'rgba(255,255,255,0.06)', borderRadius:4, marginTop:10, overflow:'hidden'}}>
-          <div style={{width: `${progress}%`, height:8, background:'#00c878', transition:'width 500ms'}} />
+          <div style={{width: `${progress}%`, height:8, background:'#00c878', transition:'width 400ms'}} />
         </div>
-        {state==='COMPLETE' && (
-          <div style={{marginTop:10, padding:8, background:'rgba(255,255,255,0.03)', borderRadius:6}}>
-            <div style={{fontFamily:'monospace', color:'#F9FAFB'}}>Scan completed · Public sources only</div>
-            <div style={{height:60, marginTop:8, border: '1px dashed rgba(255,255,255,0.04)', borderRadius:6}} />
-          </div>
-        )}
       </div>
-      <div style={{display:'flex',gap:8,marginTop:12, justifyContent:'center'}}>
-        <button onClick={start} style={{padding:'10px 16px', borderRadius:6, background:'#00c878', border:'none', fontFamily:'monospace'}}>Start (dev)</button>
-      </div>
+      ) : (
+        <div style={{padding:8}}>
+          <div style={{fontFamily:'monospace', color:'#F9FAFB'}}>Scan completed · Public sources only</div>
+          <div style={{height:80, marginTop:8, border: '1px dashed rgba(255,255,255,0.04)', borderRadius:6}} />
+        </div>
+      )}
     </div>
   )
 }
