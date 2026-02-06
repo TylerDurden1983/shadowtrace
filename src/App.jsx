@@ -1,65 +1,105 @@
-import React, {useRef, useState} from 'react'
-import MatrixCanvas from './matrix/MatrixCanvas'
-import ScanConsole from './ScanConsole'
-import ResultsPanel from './ResultsPanel'
-import './index.css'
-export default function App(){
-  const consoleRef = useRef({})
-  const [panelMode, setPanelMode] = useState('closed') // closed | open | settled
+import React, { useRef, useState } from "react";
+import MatrixCanvas from "./matrix/MatrixCanvas";
+import ScanConsole from "./ScanConsole";
+import ResultsPanel from "./ResultsPanel";
+import "./index.css";
 
-  function onScanClick(e){
-    e.preventDefault()
-    const input = document.getElementById('queryInput')
-    const btn = document.getElementById('scanBtn')
-    if(!input || !btn) return
-    if(btn.disabled) return
-    input.disabled = true
-    input.style.opacity = '0.6'
-    btn.textContent = 'TASKING'
-    btn.disabled = true
-    btn.style.opacity = '0.8'
-    // open hatch
-    setPanelMode('open')
-    // trigger console run
-    if(consoleRef.current && typeof consoleRef.current.run === 'function'){
-      consoleRef.current.run()
+export default function App() {
+  const consoleRef = useRef({});
+  const [panelMode, setPanelMode] = useState("closed"); // closed | open | results
+  const [phase, setPhase] = useState("idle"); // idle | scanning | results
+  const [scanNonce, setScanNonce] = useState(0);
+  const [query, setQuery] = useState("");
+
+  function beginScan() {
+    if (phase === "scanning") return;
+    // If we're in results, animate out first, then restart scan.
+    if (phase === "results") {
+      setPanelMode("open");
+      setPhase("scanning");
+      setScanNonce((n) => n + 1);
+      setTimeout(() => {
+        if (consoleRef.current && typeof consoleRef.current.run === "function") {
+          consoleRef.current.run();
+        }
+      }, 150);
+      return;
     }
-  }
-  function onComplete(){
-    const input = document.getElementById('queryInput')
-    const btn = document.getElementById('scanBtn')
-    if(input){ input.disabled = false; input.style.opacity = '1' }
-    if(btn){ btn.disabled = false; btn.style.opacity = '1'; btn.textContent = 'Scan' }
-    // settle hatch (compact showing header/placeholder)
-    setPanelMode('settled')
+
+    setPanelMode("open");
+    setPhase("scanning");
+    setScanNonce((n) => n + 1);
+    // tiny delay so the panel visibly opens before console starts typing
+    setTimeout(() => {
+      if (consoleRef.current && typeof consoleRef.current.run === "function") {
+        consoleRef.current.run();
+      }
+    }, 150);
   }
 
-  const hatchMode = panelMode === 'closed' ? 'hatch-closed' : panelMode === 'open' ? 'hatch-open' : 'hatch-settled'
+  function onComplete() {
+    // console finishes -> morph to results
+    setPanelMode("results");
+    setPhase("results");
+  }
+
+  const isRunning = phase === "scanning";
 
   return (
-    <div style={{minHeight:'100vh'}}>
+    <div style={{ minHeight: "100vh" }}>
       <MatrixCanvas />
-      <main style={{position:'relative',zIndex:10,display:'flex',alignItems:'flex-start',justifyContent:'center',width:'100%'}}>
-        <div className="container-max text-center" style={{paddingTop:72}}>
-          <div className="glass-panel"> 
+      <main className="app-shell">
+        <div className="container-max">
+          <div
+            className={[
+              "glass-panel",
+              panelMode === "closed"
+                ? "glass-closed"
+                : panelMode === "open"
+                ? "glass-open"
+                : "glass-results",
+            ].join(" ")}
+          >
             <h1 className="hero-title">SHADOWTRACE</h1>
             <p className="hero-sub mt-6">Find your public footprint. Before someone else does.</p>
+
             <div className="mt-8 flex flex-col items-center gap-3">
-              <div style={{display:'flex',gap:12,alignItems:'center'}}>
-                <input id="queryInput" aria-label="query" placeholder="Enter email, username, or phone" className="w-full max-w-md px-4 py-3 rounded input-cta" />
-                <button id="scanBtn" onClick={onScanClick} className="button-cta" style={{borderRadius:8}}>Scan</button>
+              <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                <input
+                  id="queryInput"
+                  aria-label="query"
+                  placeholder="Enter email, username, or phone"
+                  className="w-full max-w-md px-4 py-3 rounded input-cta"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  disabled={isRunning}
+                />
+                <button
+                  id="scanBtn"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    beginScan();
+                  }}
+                  className="button-cta"
+                  style={{ borderRadius: 8 }}
+                  disabled={isRunning}
+                >
+                  {isRunning ? "TASKING" : "Scan"}
+                </button>
               </div>
               <div className="secondary-cta">See a sample report →</div>
             </div>
+
             <p className="disclaimer mt-6">Only searches public sources. No hacks. No magic.</p>
 
-            <div className={`hatch ${hatchMode}`} style={{marginTop:16}}>
-              <div className={`console-wrap ${(panelMode==='open' || panelMode==='settled') ? 'console-visible' : 'console-hidden'}`} style={{transitionDelay: panelMode==='open'?'150ms':'0ms'}}>
-                {panelMode === 'settled' ? (
-                  <ResultsPanel />
-                ) : (
-                  <ScanConsole runSignal={consoleRef} onComplete={onComplete} />
-                )}
+            {/* MORPH PANEL */}
+            <div className="panel-inner" style={{ marginTop: 16 }}>
+              <div className={`console-layer ${phase === "results" ? "layer-out" : "layer-in"}`}>
+                <ScanConsole key={`console-${scanNonce}`} runSignal={consoleRef} onComplete={onComplete} />
+              </div>
+
+              <div className={`results-layer ${phase === "results" ? "layer-in" : "layer-out"}`}>
+                {phase === "results" && <ResultsPanel key={`results-${scanNonce}`} />}
               </div>
             </div>
 
@@ -67,5 +107,5 @@ export default function App(){
         </div>
       </main>
     </div>
-  )
+  );
 }
