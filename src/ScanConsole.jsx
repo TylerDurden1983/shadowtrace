@@ -20,6 +20,23 @@ export default function ScanConsole({runSignal, onComplete}){
   const markLastDone = () => {
     setLines(l => { if(l.length===0) return l; const copy = l.slice(); copy[copy.length-1] = {...copy[copy.length-1], status:'done'}; return copy })
   }
+  const animateProgressTo = (target, duration) => {
+    return new Promise(res=>{
+      if(duration<=0){ setProgress(target); return res() }
+      const start = progress;
+      const delta = target - start;
+      const stepMs = 50;
+      const steps = Math.max(1, Math.floor(duration/stepMs));
+      let cur = 0;
+      const t = setInterval(()=>{
+        cur++
+        const v = Math.round(start + delta*(cur/steps))
+        setProgress(v)
+        if(cur>=steps){ clearInterval(t); timers.current.push(t); return res() }
+      }, stepMs)
+      timers.current.push(t)
+    })
+  }
 
   useEffect(()=>{
     return ()=>{ // cleanup timers on unmount
@@ -37,19 +54,19 @@ export default function ScanConsole({runSignal, onComplete}){
     try{
       // define deterministic steps: text, progressTarget, delay
       const steps = [
-        {text:'TASK ACCEPTED', progress:2, delay:300},
+        {text:'TASK ACCEPTED', progress:3, delay:300},
         {text:'Initializing reconnaissance pipeline...', progress:10, delay:1000},
-        {text:'Normalizing identifier', progress:10, delay:200},
-        {text:'Hashing input', progress:10, delay:200},
-        {text:'Spawning workers', progress:10, delay:200},
-        {text:'Enumerating identifier variants...', progress:25, delay:600},
-        {text:'Querying public identity indexes...', progress:40, delay:600},
-        {text:'Scanning breach metadata...', progress:55, delay:600},
-        {text:'Mapping username reuse patterns...', progress:65, delay:600},
-        {text:'Analyzing social graph overlaps...', progress:65, delay:600},
-        {text:'Correlating cross-platform signals...', progress:65, delay:600},
-        {text:'Cross-referencing signals...', progress:75, delay:700},
-        {text:'Calculating exposure confidence...', progress:85, delay:800},
+        {text:'Normalizing identifier', progress:16, delay:200},
+        {text:'Hashing input', progress:22, delay:200},
+        {text:'Spawning workers', progress:28, delay:200},
+        {text:'Enumerating identifier variants...', progress:36, delay:600},
+        {text:'Querying public identity indexes...', progress:46, delay:600},
+        {text:'Scanning breach metadata...', progress:58, delay:600},
+        {text:'Mapping username reuse patterns...', progress:68, delay:600},
+        {text:'Analyzing social graph overlaps...', progress:76, delay:600},
+        {text:'Correlating cross-platform signals...', progress:84, delay:600},
+        {text:'Cross-referencing signals...', progress:90, delay:700},
+        {text:'Calculating exposure confidence...', progress:96, delay:800},
         {text:'Compiling intelligence brief...', progress:100, delay:1000},
         {text:'REPORT READY', progress:100, delay:300}
       ]
@@ -57,10 +74,8 @@ export default function ScanConsole({runSignal, onComplete}){
       for(let i=0;i<steps.length;i++){
         const s = steps[i]
         appendLine(s.text, 'active')
-        setActiveIndex(i)
-        // set progress to target
-        setProgress(s.progress)
-        await wait(s.delay, timers)
+        // animate progress to target over delay
+        await animateProgressTo(s.progress, s.delay)
         // mark current as done
         markLastDone()
       }
@@ -68,10 +83,11 @@ export default function ScanConsole({runSignal, onComplete}){
       setActiveIndex(steps.length-1)
       await wait(300, timers)
       setActiveIndex(-1)
-      setState('COMPLETE')
-      runningRef.current = false
-      onComplete?.()
     }catch(e){
+      // swallow errors but ensure cleanup
+      console.error(e)
+    }finally{
+      setState('COMPLETE')
       runningRef.current = false
       onComplete?.()
     }
