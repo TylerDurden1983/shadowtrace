@@ -1,6 +1,7 @@
 import React, {useRef, useState} from 'react'
 import MatrixCanvas from './matrix/MatrixCanvas'
 import ScanConsole from './ScanConsole'
+import ResultsPanel from './ResultsPanel'
 import './index.css'
 export default function App(){
   const consoleRef = useRef({})
@@ -54,7 +55,11 @@ export default function App(){
 
             <div className={`hatch ${hatchMode}`} style={{marginTop:16}}>
               <div className={`console-wrap ${(panelMode==='open' || panelMode==='settled') ? 'console-visible' : 'console-hidden'}`} style={{transitionDelay: panelMode==='open'?'150ms':'0ms'}}>
-                <ScanConsole runSignal={consoleRef} onComplete={onComplete} />
+                {panelMode === 'settled' ? (
+                  <ResultsPanel />
+                ) : (
+                  <ScanConsole runSignal={consoleRef} onComplete={onComplete} />
+                )}
               </div>
             </div>
 
