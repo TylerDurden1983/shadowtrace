@@ -17,7 +17,7 @@ export default function App(){
     btn.textContent = 'TASKING'
     btn.disabled = true
     btn.style.opacity = '0.8'
-    // open panel
+    // open hatch
     setPanelMode('open')
     // trigger console run
     if(consoleRef.current && typeof consoleRef.current.run === 'function'){
@@ -29,16 +29,18 @@ export default function App(){
     const btn = document.getElementById('scanBtn')
     if(input){ input.disabled = false; input.style.opacity = '1' }
     if(btn){ btn.disabled = false; btn.style.opacity = '1'; btn.textContent = 'Scan' }
-    // settle panel (compact showing header/placeholder)
+    // settle hatch (compact showing header/placeholder)
     setPanelMode('settled')
   }
+
+  const hatchMode = panelMode === 'closed' ? 'hatch-closed' : panelMode === 'open' ? 'hatch-open' : 'hatch-settled'
 
   return (
     <div style={{minHeight:'100vh'}}>
       <MatrixCanvas />
       <main style={{position:'relative',zIndex:10,display:'flex',alignItems:'flex-start',justifyContent:'center',width:'100%'}}>
         <div className="container-max text-center" style={{paddingTop:72}}>
-          <div className={`glass-panel ${panelMode==='closed'?'glass-closed':panelMode==='open'?'glass-open':'glass-settled'}`} style={{background:'rgba(0,0,0,0.6)', borderRadius:12, padding:'36px 32px', display:'inline-block', backdropFilter:'blur(4px)'}}> 
+          <div className="glass-panel"> 
             <h1 className="hero-title">SHADOWTRACE</h1>
             <p className="hero-sub mt-6">Find your public footprint. Before someone else does.</p>
             <div className="mt-8 flex flex-col items-center gap-3">
@@ -49,9 +51,13 @@ export default function App(){
               <div className="secondary-cta">See a sample report →</div>
             </div>
             <p className="disclaimer mt-6">Only searches public sources. No hacks. No magic.</p>
-            <div className={`console-wrap ${panelMode==='open' ? 'console-visible' : 'console-hidden'}`} style={{transitionDelay: panelMode==='open'?'150ms':'0ms'}}>
-              <ScanConsole runSignal={consoleRef} onComplete={onComplete} />
+
+            <div className={`hatch ${hatchMode}`} style={{marginTop:16}}>
+              <div className={`console-wrap ${(panelMode==='open' || panelMode==='settled') ? 'console-visible' : 'console-hidden'}`} style={{transitionDelay: panelMode==='open'?'150ms':'0ms'}}>
+                <ScanConsole runSignal={consoleRef} onComplete={onComplete} />
+              </div>
             </div>
+
           </div>
         </div>
       </main>
