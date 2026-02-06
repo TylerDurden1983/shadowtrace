@@ -29,3 +29,7 @@ h1{ color:#F9FAFB; font-weight:900; opacity:1 }
 .console-wrap{ transition: opacity 300ms ease, transform 300ms ease }
 .console-hidden{ opacity:0; transform: translateY(8px); pointer-events:none }
 .console-visible{ opacity:1; transform: translateY(0) }
+/* console line styles */
+.console-line{ opacity:0.85 }
+.console-line.muted{ opacity:0.55; color: #9CA3AF }
+.console-line.active{ color: #00c878; opacity:1 }
