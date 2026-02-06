@@ -20,6 +20,12 @@ export default function App(){
       consoleRef.current.run()
     }
   }
+  function onComplete(){
+    const input = document.getElementById('queryInput')
+    const btn = document.getElementById('scanBtn')
+    if(input){ input.disabled = false; input.style.opacity = '1' }
+    if(btn){ btn.disabled = false; btn.style.opacity = '1'; btn.textContent = 'Scan' }
+  }
 
   return (
     <div style={{minHeight:'100vh'}}>
@@ -37,7 +43,7 @@ export default function App(){
               <div className="secondary-cta">See a sample report →</div>
             </div>
             <p className="disclaimer mt-6">Only searches public sources. No hacks. No magic.</p>
-            <ScanConsole runSignal={consoleRef} />
+            <ScanConsole runSignal={consoleRef} onComplete={onComplete} />
           </div>
         </div>
       </main>
