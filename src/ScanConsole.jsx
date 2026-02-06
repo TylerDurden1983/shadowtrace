@@ -6,7 +6,7 @@ function wait(ms, timers){
   return new Promise(r=>{ const t = setTimeout(r, ms); timers.current.push(t) })
 }
 
-export default function ScanConsole({runSignal}){
+export default function ScanConsole({runSignal, onComplete}){
   const [state, setState] = useState('IDLE')
   const [lines, setLines] = useState([])
   const [progress, setProgress] = useState(0)
@@ -87,17 +87,17 @@ export default function ScanConsole({runSignal}){
       setState('COMPLETE')
       setLines([{text:'REPORT READY', status:'done'}])
       runningRef.current = false
+      onComplete?.()
     }catch(e){
       runningRef.current = false
+      onComplete?.()
     }
   }
 
-  // expose runSequence via window event removed; parent will call runSequence through prop
-  useEffect(()=>{
-    if(runSignal && typeof runSignal.current === 'function'){
-      runSignal.current.run = runSequence
-    }
-  },[runSignal])
+  // expose runSequence to parent via runSignal ref
+  useEffect(() => {
+    if (runSignal?.current) runSignal.current.run = runSequence
+  }, [runSignal])
 
   return (
     <div style={{marginTop:24}}>
