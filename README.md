@@ -1,16 +1,22 @@
-# React + Vite
+# shadowtrace
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+ShadowTrace - Alpha
 
-Currently, two official plugins are available:
+Local run:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+1. npm install
+2. npm run dev
 
-## React Compiler
+Build:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+1. npm run build
 
-## Expanding the ESLint configuration
+Deploy on the ShadowTrace droplet:
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+1. ssh user@shadowtrace-droplet
+2. git clone https://github.com/$(gh api user --jq .login)/shadowtrace.git
+3. cd shadowtrace
+4. npm ci --production=false
+5. npm run build
+6. serve the build (example): npx serve -s dist -l 80
+
