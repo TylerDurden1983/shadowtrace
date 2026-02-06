@@ -5,7 +5,6 @@ export default function App(){
   return (
     <div style={{minHeight:'100vh'}}>
       <MatrixCanvas />
-      <div style={{position:'fixed',inset:0,zIndex:5,pointerEvents:'none',background:'rgba(0,0,0,0.32)'}} />
       <main style={{position:'relative',zIndex:10,display:'flex',alignItems:'flex-start',justifyContent:'center',width:'100%'}}>
         <div className="container-max text-center" style={{paddingTop:72}}>
           <h1 className="hero-title">SHADOWTRACE</h1>

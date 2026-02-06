@@ -8,51 +8,45 @@ export default function MatrixCanvas(){
     let w=0, h=0
     let cols = []
     let running = false
-    function resize(){
+    function setSize(){
       w = canvas.width = window.innerWidth
       h = canvas.height = window.innerHeight
+    }
+    function resize(){
+      setSize()
       const count = Math.max(20, Math.floor(w / 18))
-      cols = new Array(count).fill(0).map(()=>({y: -Math.random()*h, speed: 0.08 + Math.random()*0.3}))
+      cols = new Array(count).fill(0).map(()=>({y: -Math.random()*h, speed: 0.12 + Math.random()*0.25}))
     }
     function randChar(){
-      const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZあいうえおカタカナ'
+      const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
       return chars.charAt(Math.floor(Math.random()*chars.length))
     }
     let raf
     function draw(){
       if(!running){ raf = requestAnimationFrame(draw); return }
-      // smaller alpha so tracers persist longer
-      ctx.fillStyle = 'rgba(0,0,0,0.04)'
+      // simple fade to create trailing effect without explicit tracers
+      ctx.fillStyle = 'rgba(0,0,0,0.15)'
       ctx.fillRect(0,0,w,h)
       ctx.font = '18px monospace'
       for(let i=0;i<cols.length;i++){
         const x = Math.floor(i * (w / cols.length))
         const col = cols[i]
         const y = Math.floor(col.y)
-        // draw tail
-        for(let t=5;t>0;t--){
-          const yy = y - t*18
-          if(yy < 0) continue
-          const opacity = Math.max(0, 0.9 - (6-t)*0.13)
-          ctx.fillStyle = `rgba(0,220,120,${opacity * 0.35})`
-          ctx.fillText(randChar(), x, yy)
-        }
-        // bright head
-        ctx.fillStyle = 'rgba(180,255,180,0.99)'
+        ctx.fillStyle = 'rgba(0,200,120,0.9)'
         ctx.fillText(randChar(), x, y)
         col.y = y > h + 20 ? -20 : y + col.speed * 1.0
-        col.speed += (Math.random()-0.5)*0.01
-        if(col.speed < 0.03) col.speed = 0.03
-        if(col.speed > 0.6) col.speed = 0.6
       }
       raf = requestAnimationFrame(draw)
     }
     function start(){ cols.forEach(c=> c.y = -Math.random()*h); running = true }
+    // ensure canvas full-screen size set immediately
+    setSize()
     resize()
-    window.addEventListener('resize', resize)
+    window.addEventListener('resize', () => { setSize(); resize(); })
+    // start after small delay
     const t = setTimeout(start, 300)
     raf = requestAnimationFrame(draw)
     return ()=>{ cancelAnimationFrame(raf); window.removeEventListener('resize', resize); clearTimeout(t) }
   },[])
-  return <canvas ref={ref} style={{position:'fixed',left:0,top:0,width:'100vw',height:'100vh',zIndex:0,pointerEvents:'none'}} />
+  return <canvas ref={ref} style={{position:'fixed',top:0,left:0,width:'100vw',height:'100vh',zIndex:0,pointerEvents:'none'}} />
 }
