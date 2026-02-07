@@ -5,7 +5,7 @@ import ResultsPanel from "./ResultsPanel";
 import "./index.css";
 
 export default function App() {
-  const consoleRef = useRef({});
+  const consoleRef = useRef(null);
   const [panelMode, setPanelMode] = useState("closed"); // closed | open | results
   const [phase, setPhase] = useState("idle"); // idle | scanning | results
   const [scanNonce, setScanNonce] = useState(0);
@@ -100,7 +100,7 @@ export default function App() {
                 phase === "scanning" ? "layer-in" : "layer-out",
               ].join(" ")} >
                 <div className="console-wrap console-visible">
-                  <ScanConsole key={`console-${scanNonce}`} runSignal={consoleRef} onComplete={onComplete} />
+                  <ScanConsole key={`console-${scanNonce}`} ref={consoleRef} onComplete={onComplete} />
                 </div>
               </div>
 
